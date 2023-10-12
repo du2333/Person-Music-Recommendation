@@ -8,6 +8,7 @@ bp = func.Blueprint()
 client_id = os.environ.get("Client_ID")
 client_secret = os.environ.get("Client_Secret")
 
+# TODO create a class to manage the tokens, if the token has expired, get a new one
 
 @bp.route(route="recommendation")
 def recommendation_function(req: func.HttpRequest) -> func.HttpResponse:
