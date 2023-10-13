@@ -85,3 +85,16 @@ def search(token, query, search_type="track", limit=5):
     return search_results
 
 # TODO implement the method to get all the available genres
+def genre(token):
+    url = 'https://api.spotify.com/v1/recommendations/available-genre-seeds'
+
+    headers = {
+        'Authorization':token,
+    }
+    available_genre_list = []
+
+    response = requests.get(url=url,headers=headers)
+    if response.status_code == 200:
+        data = response.json()
+        available_genre_list = data.get('genres',[])
+    return available_genre_list

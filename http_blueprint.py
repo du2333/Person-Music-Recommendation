@@ -1,7 +1,7 @@
 import azure.functions as func
 import json
 import os
-from Spotify_API import get_recommendation, search, get_token
+from Spotify_API import get_recommendation, search, get_token, genre
 
 bp = func.Blueprint()
 
@@ -31,6 +31,7 @@ def recommendation_function(req: func.HttpRequest) -> func.HttpResponse:
 def search_function(req: func.HttpRequest) -> func.HttpResponse:
     query = req.params.get("q")
     token = get_token(client_id, client_secret)
+    print(token)
     if not query:
         error_response = {"error": "Missing query parameter", "status_code": 400}
         return func.HttpResponse(
@@ -43,3 +44,12 @@ def search_function(req: func.HttpRequest) -> func.HttpResponse:
     search_results = search(token, query, search_type, limit)
 
     return func.HttpResponse(json.dumps(search_results), mimetype="application/json")
+
+@bp.route(route="genre")
+def available_genre(req: func.HttpRequest) -> func.HttpResponse:
+    token = get_token(client_id,client_secret)
+    available_genre_list_result = genre(token)
+    return func.HttpResponse(
+        json.dumps(available_genre_list_result), mimetype="application/json"
+        )
+    
