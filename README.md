@@ -96,7 +96,7 @@ GET https://personal-music-recommendation.azurewebsites.net/api/search?code=your
 ]
 ```
 ### Available Genre
-- **Endpoint**: `/recommendations/available-genre-seeds`
+- **Endpoint**: `/genre`
 - **Description**: `Retrieve a list of available genres seed parameter values for recommendations.`
 - **HTTP Method**: GET
 
