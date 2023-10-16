@@ -10,15 +10,12 @@ Base URL: [https://personal-music-recommendation.azurewebsites.net/api](https://
 
 All endpoints require authentication using a function key. The function key is included as a query parameter in the request URL.
 
-### Search Function Key
+### Function Key
 
 - **Query Parameter**: `code`
-- **Value**: `dkS5_6Zm8E-ElF4KzKlwPwZTDm-0_5d2_Q-Re5afhl-yAzFu-Ak5rg==`
-
-### Recommendation Function Key
-
-- **Query Parameter**: `code`
-- **Value**: `BiLtlWfdvS4NmIH_Y9_xDnCT1Cs5rOLoLWvenK88PQW8AzFuDX25TA==`
+- **Search**: `dkS5_6Zm8E-ElF4KzKlwPwZTDm-0_5d2_Q-Re5afhl-yAzFu-Ak5rg==`
+- **Recommendation**: `BiLtlWfdvS4NmIH_Y9_xDnCT1Cs5rOLoLWvenK88PQW8AzFuDX25TA==`
+- **Genre**: `yJz_N-zPQ0YOF6BRYna-eoh25AuOgdKkUpf9_AbXAjGAAzFuJiQpaA==`
 
 ## Endpoints
 
@@ -104,7 +101,7 @@ GET https://personal-music-recommendation.azurewebsites.net/api/search?code=your
 **Request Example**
 
 ```http
-get https://api.spotify.com/v1/recommendations/available-genre-seeds
+get https://personal-music-recommendation.azurewebsites.net/api/genre?code=your_function_key
 ```
 
 **RESPONSE SAMPLE**
