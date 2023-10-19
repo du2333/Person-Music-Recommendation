@@ -16,9 +16,8 @@ def get_token(client_id, client_secret):
 
 
 # TODO optional recommendation by multiple songs/genre
-# TODO add limit parameter
-def get_recommendation(token, song=None, genre=None):
-    params = {"limit": 5}
+def get_recommendation(token, limit, song=None, genre=None):
+    params = {"limit": limit}
 
     if song is not None:
         # Handle the case where song is provided
@@ -63,13 +62,13 @@ def get_recommendation(token, song=None, genre=None):
     return recommendation_list
 
 
-def search(token, query, search_type="track", limit=5):
+def search(token, query, limit=5):
     url = "https://api.spotify.com/v1/search"
     headers = {
         "Authorization": token,
     }
 
-    params = {"q": query, "type": search_type, "limit": limit}
+    params = {"q": query, "type": "track", "limit": limit}
 
     response = requests.get(url=url, params=params, headers=headers)
 
