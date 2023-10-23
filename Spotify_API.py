@@ -1,6 +1,6 @@
 import requests
 
-# TODO write proper comments
+
 def get_token(client_id, client_secret):
     token_url = "https://accounts.spotify.com/api/token"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -15,18 +15,30 @@ def get_token(client_id, client_secret):
     return f"Bearer {token}"
 
 
-# TODO add recommendation by genres
-# TODO optional: input songs are not limited to 5, send separate requests and merge them
-def get_recommendation(token, song):
-    search_result_list = search(token, song)
-    track_id = search_result_list[0]["id"]
-    url = "https://api.spotify.com/v1/recommendations"
+# TODO optional recommendation by multiple songs/genre
+def get_recommendation(token, limit, song=None, genre=None):
+    params = {"limit": limit}
 
+    if song is not None:
+        # Handle the case where song is provided
+        search_result_list = search(token, song)
+        track_id = search_result_list[0]["id"]
+        params["seed_tracks"] = track_id
+
+    if genre is not None:
+        # Handle the case where genre is provided
+        params["seed_genres"] = genre
+
+    if not params:
+        # Handle the case where neither song nor genre is provided
+        return []
+
+    # Rest of the code for making the recommendation request
+
+    url = "https://api.spotify.com/v1/recommendations"
     headers = {
         "Authorization": token,
     }
-
-    params = {"limit": 5, "seed_tracks": track_id}
 
     response = requests.get(url=url, params=params, headers=headers)
 
@@ -47,17 +59,16 @@ def get_recommendation(token, song):
                     "images": images,
                 }
             )
-        # FIXME handle other status code errors
     return recommendation_list
 
 
-def search(token, query, search_type="track", limit=5):
+def search(token, query, limit=5):
     url = "https://api.spotify.com/v1/search"
     headers = {
         "Authorization": token,
     }
 
-    params = {"q": query, "type": search_type, "limit": limit}
+    params = {"q": query, "type": "track", "limit": limit}
 
     response = requests.get(url=url, params=params, headers=headers)
 
@@ -65,7 +76,6 @@ def search(token, query, search_type="track", limit=5):
 
     if response.status_code == 200:
         data = response.json()
-        # TODO extract this as a method to be reusable
         for track in data["tracks"]["items"]:
             track_name = track["name"]
             artists = [artist["name"] for artist in track["artists"]]
@@ -81,20 +91,19 @@ def search(token, query, search_type="track", limit=5):
                     "images": images,
                 }
             )
-        # FIXME handle other status code errors
     return search_results
 
-# TODO implement the method to get all the available genres
+
 def genre(token):
-    url = 'https://api.spotify.com/v1/recommendations/available-genre-seeds'
+    url = "https://api.spotify.com/v1/recommendations/available-genre-seeds"
 
     headers = {
-        'Authorization':token,
+        "Authorization": token,
     }
     available_genre_list = []
 
-    response = requests.get(url=url,headers=headers)
+    response = requests.get(url=url, headers=headers)
     if response.status_code == 200:
         data = response.json()
-        available_genre_list = data.get('genres',[])
+        available_genre_list = data.get("genres", [])
     return available_genre_list
