@@ -27,7 +27,10 @@ All endpoints require authentication using a function key. The function key is i
 
 #### Query Parameters:
 
-- `song` (required) - The name of the song for which you want recommendations.
+- `song` (required if genre is not set) - The name of the song for which you want recommendations.
+- `genre` (required if song is not set) - The genre of the song for which you want recommendations.
+- `limit` (optional) - The maximum number of recommendation results (default: 5).
+  
 
 **Request Example:**
 
@@ -63,7 +66,6 @@ GET https://personal-music-recommendation.azurewebsites.net/api/recommendation?c
 #### Query Parameters:
 
 - `q` (required) - The search query.
-- `type` (optional) - The type of search (default: "track").
 - `limit` (optional) - The maximum number of search results (default: 5).
 
 **Request Example:**
