@@ -1,15 +1,14 @@
 import azure.functions as func
 import json
 import os
-from Spotify_API import get_recommendation, search, get_token, genre
+from Spotify_API import Spotify
 
 bp = func.Blueprint()
 
 client_id = os.environ.get("Client_ID")
 client_secret = os.environ.get("Client_Secret")
 
-
-# TODO Token Management and Caching
+spotify = Spotify(client_id, client_secret)
 # TODO Centralizing Error Handling and Response Generation
 
 
@@ -25,16 +24,14 @@ def recommendation_function(req: func.HttpRequest) -> func.HttpResponse:
     except (TypeError, ValueError):
         limit = 5
 
-    token = get_token(client_id, client_secret)
-
     if song and genre:
-        recommendation_list = get_recommendation(
-            token=token, song=song, genre=genre, limit=limit
+        recommendation_list = spotify.get_recommendation(
+            song=song, genre=genre, limit=limit
         )
     elif song:
-        recommendation_list = get_recommendation(token=token, song=song, limit=limit)
+        recommendation_list = spotify.get_recommendation(song=song, limit=limit)
     elif genre:
-        recommendation_list = get_recommendation(token=token, genre=genre, limit=limit)
+        recommendation_list = spotify.get_recommendation(genre=genre, limit=limit)
     else:
         error_response = {
             "error": "Please provide either a 'genre' or a 'song' parameter, or both",
@@ -67,22 +64,20 @@ def search_function(req: func.HttpRequest) -> func.HttpResponse:
     except (TypeError, ValueError):
         limit = 5
 
-    token = get_token(client_id, client_secret)
     if not query:
         error_response = {"error": "Missing query parameter", "status_code": 400}
         return func.HttpResponse(
             json.dumps(error_response), mimetype="application/json", status_code=400
         )
 
-    search_results = search(token, query, limit)
+    search_results = spotify.search(query, limit)
 
     return func.HttpResponse(json.dumps(search_results), mimetype="application/json")
 
 
 @bp.route(route="genre")
-def available_genre(req: func.HttpRequest) -> func.HttpResponse:
-    token = get_token(client_id, client_secret)
-    available_genre_list_result = genre(token)
+def available_genres(req: func.HttpRequest) -> func.HttpResponse:
+    available_genre_list_result = spotify.genres()
     return func.HttpResponse(
         json.dumps(available_genre_list_result), mimetype="application/json"
     )
