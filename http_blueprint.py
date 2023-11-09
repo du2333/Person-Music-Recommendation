@@ -8,8 +8,8 @@ bp = func.Blueprint()
 client_id = os.environ.get("Client_ID")
 client_secret = os.environ.get("Client_Secret")
 
+
 spotify = Spotify(client_id, client_secret)
-# TODO Centralizing Error Handling and Response Generation
 
 
 @bp.route(route="recommendation")
@@ -56,7 +56,7 @@ def recommendation_function(req: func.HttpRequest) -> func.HttpResponse:
 @bp.route(route="search")
 def search_function(req: func.HttpRequest) -> func.HttpResponse:
     query = req.params.get("q")
-    limit = req.params.get("limit", 5)
+    limit = req.params.get("limit")
     try:
         limit = int(limit)
         if not 1 <= limit <= 100:
@@ -70,7 +70,7 @@ def search_function(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps(error_response), mimetype="application/json", status_code=400
         )
 
-    search_results = spotify.search(query, limit)
+    search_results = spotify.search(query=query, limit=limit)
 
     return func.HttpResponse(json.dumps(search_results), mimetype="application/json")
 
