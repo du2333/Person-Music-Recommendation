@@ -1,109 +1,122 @@
 import requests
 
 
-def get_token(client_id, client_secret):
-    token_url = "https://accounts.spotify.com/api/token"
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    data = {
-        "grant_type": "client_credentials",
-        "client_id": client_id,
-        "client_secret": client_secret,
-    }
+class Spotify:
+    def __init__(self, client_id, client_secret):
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.token = self.__get_token(client_id, client_secret)
 
-    response = requests.post(url=token_url, headers=headers, data=data)
-    token = response.json().get("access_token", None)
-    return f"Bearer {token}"
+    def is_token_valid(self):
+        url = "https://api.spotify.com/v1/me"
+        headers = {
+            "Authorization": self.token,
+        }
+        response = requests.get(url=url, headers=headers)
+        if response.status_code == 200:
+            return True
+        else:
+            return False
 
+    def __get_token(self, client_id, client_secret):
+        token_url = "https://accounts.spotify.com/api/token"
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        data = {
+            "grant_type": "client_credentials",
+            "client_id": client_id,
+            "client_secret": client_secret,
+        }
 
-# TODO optional recommendation by multiple songs/genre
-def get_recommendation(token, limit, song=None, genre=None):
-    params = {"limit": limit}
+        response = requests.post(url=token_url, headers=headers, data=data)
+        if response.status_code != 200:
+            raise Exception("Unable to get token")
 
-    if song is not None:
-        # Handle the case where song is provided
-        search_result_list = search(token, song)
-        track_id = search_result_list[0]["id"]
-        params["seed_tracks"] = track_id
+        token = response.json().get("access_token", None)
+        return f"Bearer {token}"
 
-    if genre is not None:
-        # Handle the case where genre is provided
-        params["seed_genres"] = genre
+    def __make_request(self, url, params=None):
+        if not self.is_token_valid():
+            self.token = self.__get_token(self.client_id, self.client_secret)
 
-    if not params:
-        # Handle the case where neither song nor genre is provided
-        return []
+        headers = {
+            "Authorization": self.token,
+        }
 
-    # Rest of the code for making the recommendation request
+        response = requests.get(url=url, params=params, headers=headers)
 
-    url = "https://api.spotify.com/v1/recommendations"
-    headers = {
-        "Authorization": token,
-    }
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        else:
+            return None
 
-    response = requests.get(url=url, params=params, headers=headers)
+    # TODO optional recommendation by multiple songs/genre
+    def get_recommendation(self, limit: int, song=None, genre=None):
+        params = {"limit": limit}
 
-    recommendation_list = []
+        if song is not None:
+            # Handle the case where song is provided
+            search_result_list = self.search(query=song, limit=5)
+            track_id = search_result_list[0]["id"]
+            params["seed_tracks"] = track_id
 
-    if response.status_code == 200:
-        data = response.json()
-        for track in data["tracks"]:
-            track_name = track["name"]
-            artists = [artist["name"] for artist in track["artists"]]
-            external_url = track["external_urls"]["spotify"]
-            images = track["album"]["images"]
-            recommendation_list.append(
-                {
-                    "name": track_name,
-                    "artists": artists,
-                    "external_url": external_url,
-                    "images": images,
-                }
-            )
-    return recommendation_list
+        if genre is not None:
+            # Handle the case where genre is provided
+            params["seed_genres"] = genre
 
+        if not params:
+            # Handle the case where neither song nor genre is provided
+            return []
 
-def search(token, query, limit=5):
-    url = "https://api.spotify.com/v1/search"
-    headers = {
-        "Authorization": token,
-    }
+        # Rest of the code for making the recommendation request
 
-    params = {"q": query, "type": "track", "limit": limit}
+        url = "https://api.spotify.com/v1/recommendations"
 
-    response = requests.get(url=url, params=params, headers=headers)
+        data = self.__make_request(url, params)
 
-    search_results = []
+        if not data:
+            return []
 
-    if response.status_code == 200:
-        data = response.json()
-        for track in data["tracks"]["items"]:
-            track_name = track["name"]
-            artists = [artist["name"] for artist in track["artists"]]
-            external_url = track["external_urls"]["spotify"]
-            images = track["album"]["images"]
-            id = track["id"]
-            search_results.append(
-                {
-                    "name": track_name,
-                    "artists": artists,
-                    "external_url": external_url,
-                    "id": id,
-                    "images": images,
-                }
-            )
-    return search_results
+        recommendations = [self.__extract_track_info(track) for track in data["tracks"]]
+        return recommendations
 
+    def search(self, query, limit: int):
+        url = "https://api.spotify.com/v1/search"
 
-def genre(token):
-    url = "https://api.spotify.com/v1/recommendations/available-genre-seeds"
+        params = {"q": query, "type": "track", "limit": limit}
 
-    headers = {
-        "Authorization": token,
-    }
-    available_genre_list = []
+        data = self.__make_request(url, params)
 
-    response = requests.get(url=url, headers=headers)
-    if response.status_code == 200:
-        data = response.json()
+        if not data:
+            return []
+
+        search_results = [self.__extract_track_info(track) for track in data["tracks"]["items"]]
+        return search_results
+
+    def genres(self):
+        url = "https://api.spotify.com/v1/recommendations/available-genre-seeds"
+
+        data = self.__make_request(url)
+
+        if not data:
+            return []
+
+        available_genre_list = []
+
         available_genre_list = data.get("genres", [])
-    return available_genre_list
+        return available_genre_list
+
+    def __extract_track_info(self, track):
+        track_name = track["name"]
+        artists = [artist["name"] for artist in track["artists"]]
+        external_url = track["external_urls"]["spotify"]
+        images = track["album"]["images"]
+        id = track["id"]
+
+        return {
+            "name": track_name,
+            "artists": artists,
+            "external_url": external_url,
+            "id": id,
+            "images": images,
+        }
