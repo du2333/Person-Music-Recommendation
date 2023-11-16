@@ -1,3 +1,4 @@
+from re import search
 import requests
 
 
@@ -50,18 +51,28 @@ class Spotify:
         else:
             return None
 
-    # TODO optional recommendation by multiple songs/genre
     def get_recommendation(self, limit: int, song=None, genre=None):
-        params = {"limit": limit}
+        params = {"limit": limit}   
 
         if song is not None:
-            # Handle the case where song is provided
-            search_result_list = self.search(query=song, limit=5)
-            track_id = search_result_list[0]["id"]
-            params["seed_tracks"] = track_id
+            # Handle the case there are multiple songs with comma separated values
+            songs = song.split(",")
+            # only keep the top 5 songs
+            songs = songs[:5]
+            params["seed_tracks"] = ""
+            for song in songs:
+                if not song:
+                    continue
+                search_results = self.search(song, limit=5)
+                track_id = search_results[0]["id"]
+                # no comma after the last track id
+                if song == songs[-1]:
+                    params["seed_tracks"] += f"{track_id}"
+                else:
+                    params["seed_tracks"] += f"{track_id},"
 
         if genre is not None:
-            # Handle the case where genre is provided
+            # Handle the case where multiple genres are provided
             params["seed_genres"] = genre
 
         if not params:
