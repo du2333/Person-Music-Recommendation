@@ -4,18 +4,7 @@ The Personal Music Recommendation API provides endpoints for retrieving music re
 
 ## Base URL
 
-Base URL: [https://personal-music-recommendation.azurewebsites.net/api](https://personal-music-recommendation.azurewebsites.net/api)
-
-## Authentication
-
-All endpoints require authentication using a function key. The function key is included as a query parameter in the request URL.
-
-### Function Key
-
-- **Query Parameter**: `code`
-- **Search**: `dkS5_6Zm8E-ElF4KzKlwPwZTDm-0_5d2_Q-Re5afhl-yAzFu-Ak5rg==`
-- **Recommendation**: `BiLtlWfdvS4NmIH_Y9_xDnCT1Cs5rOLoLWvenK88PQW8AzFuDX25TA==`
-- **Genre**: `yJz_N-zPQ0YOF6BRYna-eoh25AuOgdKkUpf9_AbXAjGAAzFuJiQpaA==`
+Base URL: https://pmrapim.azure-api.net/personal-music-recommendation
 
 ## Endpoints
 
@@ -35,7 +24,7 @@ All endpoints require authentication using a function key. The function key is i
 **Request Example:**
 
 ```http
-GET https://personal-music-recommendation.azurewebsites.net/api/recommendation?code=your_function_key&song=hello
+GET https://pmrapim.azure-api.net/personal-music-recommendation/recommendation?song=hello
 ```
 **Response Example:**
 
@@ -71,7 +60,7 @@ GET https://personal-music-recommendation.azurewebsites.net/api/recommendation?c
 **Request Example:**
 
 ```http
-GET https://personal-music-recommendation.azurewebsites.net/api/search?code=your_function_key&q=hello&type=track&limit=10
+GET https://pmrapim.azure-api.net/personal-music-recommendation/search?q=hello&type=track&limit=10
 ```
 **Response Example:**
 
@@ -103,7 +92,7 @@ GET https://personal-music-recommendation.azurewebsites.net/api/search?code=your
 **Request Example**
 
 ```http
-GET https://personal-music-recommendation.azurewebsites.net/api/genre?code=your_function_key
+GET https://pmrapim.azure-api.net/personal-music-recommendation/genre
 ```
 
 **RESPONSE SAMPLE**
